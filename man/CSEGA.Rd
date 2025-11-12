@@ -9,7 +9,7 @@ CSEGA(seu, group_var, gene, threshold_method = "median")
 \arguments{
 \item{seu}{A Seurat object.}
 
-\item{group_var}{Metadata column name (e.g., "celltype_minor" or "orig.ident").}
+\item{group_var}{Metadata column name (e.g., "celltype" ).}
 
 \item{gene}{Target gene symbol (e.g., "DDIT3").}
 
