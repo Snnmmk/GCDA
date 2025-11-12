@@ -28,3 +28,4 @@ threshold_method can be one of the following:
 
 result$summary
 draw(result$heatmap)
+result$bubbleplot
