@@ -58,18 +58,18 @@ head(result$summary)
 # Draw heatmap
 draw(result$heatmap)
 
-# Bubble plot
+# Bubble plot with glm β
 print(result$bubbleplot)
 
-# the glm of a celltype 
-result$models[["celltypename"]] (e.g. "Epithelial")
-
-glm_obj <- result$models$celltypename  
-summary(glm_obj)       
+# Access the glm model for "Epithelial" cells
+glm_obj <- result$models[["Epithelial"]]
+summary(glm_obj)
 coef(glm_obj)
 
 
 ```
+Note: The heatmap shows cell-type proportions in High/Low groups; the glm β values are visualized in the bubble plot and stored in result$summary and result$models for further inspection.
+
 ## Citation
 If you use **CSEGA** in your research, please cite it as:
 
