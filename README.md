@@ -1,6 +1,31 @@
 # CSEGA
 Cell-type Specific Enrichment by Gene-based Annotation
 
+`CSEGA` performs **cell-type composition analysis** based on the expression of a single **GENE** in single-cell data.
+It divides cells into *High* and *Low* expression groups, compares the relative abundance of each cell type,
+and provides visual and statistical outputs including heatmaps, bubble plots, and regression summaries.
+
+The advanced version introduces **machine learning–based threshold learning** and **explainable logistic regression**.
+
+---
+## Key Features
+- 🔹 **Automatic threshold learning**  
+  - Default: *k-means (2 clusters)* for adaptive High/Low partitioning  
+  - Optional `"learn"` mode scans thresholds (1–99% quantiles) to find the cutoff that maximizes group separation  
+
+- 🔹 **Explainable logistic regression**  
+  - Fits logistic models per cell type:  
+    \[
+    I(\text{celltype} == c_t) ~ \text{expression}
+    \]
+  - Returns β coefficients and p-values to interpret how expression predicts cell-type identity  
+
+- 🔹 **Rich visualization outputs**  
+  - `ComplexHeatmap` of cell-type proportions  
+  - Bubble plot comparing High vs. Low expression groups  
+
+---
+
 # Download CSEGA
 
 ```r
@@ -10,22 +35,29 @@ remotes::install_github("Snnmmk/CSEGA")
 
 # CSEGA R
 
-A R function to evaluate whether certain cell types are enriched in the High vs Low expression group of a target gene in Single-Cell data.
 
 ## 🔧 Usage
 
 ```r
 library(CSEGA)
-result <- CSEGA(sce_data, "celltype", "gene_name", threshold_method = "median")
+result <- CSEGA(sce_data, "celltype", "gene_name", threshold_method = "kmeans")
 
 ⚙️ Threshold options
 
 threshold_method can be one of the following:
-	•	"median" (default) — split by median expression
+	•	numeric value — use a fixed cutoff (e.g. 1.2)
+	•	"median"  — split by median expression
 	•	"mean" — split by mean expression
 	•	"q0.xx" — split by a given quantile (e.g. "q0.25", "q0.75")
-	•	numeric value — use a fixed cutoff (e.g. 1.2)
+	•	"kmeans"(default) - Apply two-cluster k-means on expression values. The cluster with the higher mean is labeled High.
+    •	"learn" - Perform an adaptive search across quantile thresholds (from 1% to 99%) and automatically select the cutoff that maximizes cell-type compositional divergence. This mode enables machine-learned threshold discovery.
 
-result$summary
+
+# View summary
+head(result$summary)
+
+# Draw heatmap
 draw(result$heatmap)
-result$bubbleplot
+
+# Bubble plot
+print(result$bubbleplot)
