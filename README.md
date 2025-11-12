@@ -8,7 +8,7 @@ A R function to evaluate whether certain cell types are enriched in the High vs 
 
 ```r
 source("CSEGA.R")
-result <- gene_enrich_analysis(sce_data, "celltype", "gene_name", threshold_method = "median")
+result <- CSEGA(sce_data, "celltype", "gene_name", threshold_method = "median")
 
 ⚙️ Threshold options
 
