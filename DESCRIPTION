@@ -8,7 +8,7 @@ Description: Provides a simple tool for evaluating whether specific cell types
     are enriched in the high vs low expression groups of a target gene in single-cell data.
 License: MIT + file LICENSE
 Encoding: UTF-8
-Imports: Seurat, dplyr, ggplot2, ComplexHeatmap, circlize, grid
+Imports: Seurat, dplyr, ggplot2, ComplexHeatmap, circlize, grid, tidyr
 RoxygenNote: 7.3.2
 NeedsCompilation: no
 Packaged: 2025-11-12 17:27:57 UTC; mokerfeng
