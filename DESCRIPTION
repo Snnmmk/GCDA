@@ -2,8 +2,8 @@ Package: CSEGA
 Type: Package
 Title: Cell-type Specific Enrichment by Gene-based Annotation
 Version: 0.1.0
-Author: Snnmmk <mokerfeng@gmail.com>
-Maintainer: Snnmmk <mokerfeng@gmail.com>
+Author: Zidong Feng/Moker <mokerfeng@gmail.com>
+Maintainer: Zidong Feng/Moker <mokerfeng@gmail.com>
 Description: Provides a simple tool for evaluating whether specific cell types 
     are enriched in the high vs low expression groups of a target gene in single-cell data.
 License: MIT + file LICENSE
