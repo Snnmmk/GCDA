@@ -61,3 +61,9 @@ draw(result$heatmap)
 
 # Bubble plot
 print(result$bubbleplot)
+
+```
+## Citation
+If you use **CSEGA** in your research, please cite it as:
+
+Zidong Feng (2025). *CSEGA: Cell-type Specific Expression-Guided Analysis with Adaptive and Explainable Learning*. https://github.com/Snnmmk/CSEGA
