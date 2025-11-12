@@ -37,7 +37,6 @@
 #'
 #' @export
 
-
 CSEGA <- function(seu,
                   group_var,
                   gene,
@@ -240,15 +239,14 @@ CSEGA <- function(seu,
   bubble_df <- prop_stats_df %>%
     tidyr::pivot_longer(cols = c("x_high", "x_low"), names_to = "count_name", values_to = "count") %>%
     mutate(expr_group = ifelse(count_name == "x_high", "High", "Low")) %>%
-    group_by(expr_group) %>%
-    mutate(proportion = ifelse(sum(count, na.rm = TRUE) == 0, 0, count / sum(count, na.rm = TRUE))) %>%
-    ungroup() %>%
-    rename(celltype = celltype)
+    group_by(celltype) %>%
+    mutate(proportion = count / sum(count, na.rm = TRUE)) %>%
+    ungroup()
   # join beta
   bubble_df <- bubble_df %>% left_join(final_df %>% select(celltype, beta, sig_label), by = "celltype")
   # replace NA beta with 0 for coloring but keep NA record
   bubble_df$beta_for_plot <- ifelse(is.na(bubble_df$beta), 0, bubble_df$beta)
-  x_max <- mean(as.numeric(factor(bubble_df$expr_group)))
+  x_max <- mean(as.numeric(factor(bubble_df$expr_group)))-0.1
   bp <- ggplot(bubble_df, aes(x = expr_group, y = celltype)) +
     geom_point(aes(size = proportion, fill = beta_for_plot), shape = 21, color = "grey30") +
     scale_size_continuous(range = c(3, 10), name = "Proportion") +
