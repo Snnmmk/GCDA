@@ -13,13 +13,12 @@ The advanced version introduces **machine learning–based threshold learning** 
   - Default: *k-means (2 clusters)* for adaptive High/Low partitioning  
   - Optional `"learn"` mode scans thresholds (1–99% quantiles) to find the cutoff that maximizes group separation  
 
-- 🔹 **Explainable logistic regression**  
-  - Fits logistic models per cell type:  
-    \[
-    I(\text{celltype} == c_t) ~ \text{expression}
-    \]
-  - Returns β coefficients and p-values to interpret how expression predicts cell-type identity  
-
+- 🔹 **Explainable logistic regression**
+  - For each cell type *ct*, the model fits:  
+    **logit[P(celltype = ct)] = α + β × expression**
+  - β > 0 indicates enrichment, β < 0 indicates depletion.  
+  - Returns β and p-values for interpretability.
+ 
 - 🔹 **Rich visualization outputs**  
   - `ComplexHeatmap` of cell-type proportions  
   - Bubble plot comparing High vs. Low expression groups  
