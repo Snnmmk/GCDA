@@ -15,7 +15,7 @@ A R function to evaluate whether certain cell types are enriched in the High vs 
 ## 🔧 Usage
 
 ```r
-source("CSEGA.R")
+library(CSEGA)
 result <- CSEGA(sce_data, "celltype", "gene_name", threshold_method = "median")
 
 ⚙️ Threshold options
