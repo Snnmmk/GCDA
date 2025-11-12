@@ -108,6 +108,27 @@ CSEGA <- function(seu, group_var, gene, threshold_method = "median") {
       }
     }
   )
+   bubble_df <- res_df %>%
+    pivot_longer(cols = c(p_high, p_low), names_to = "expr_group", values_to = "proportion") %>%
+    mutate(expr_group = ifelse(expr_group == "p_high", "High", "Low"),
+           sig_label = sig_cells$sig_label[match(celltype, sig_cells$celltype)])
+  x_max <- mean(as.numeric(factor(bubble_df$expr_group))) 
+  bp <- ggplot(bubble_df, aes(x = expr_group, y = celltype)) +
+    geom_point(aes(size = proportion, fill = fold_change), shape = 21, color = "grey30") +
+    scale_size_continuous(range = c(3, 10), name = "Proportion") +
+    scale_fill_gradient2(low = "#057dcd", mid = "#FFFFBF", high = "#e50000", midpoint = 1, name = "Fold change") +
+    geom_text(data = bubble_df %>% distinct(celltype, sig_label),
+              aes(x = x_max, y = celltype, label = sig_label),
+              inherit.aes = FALSE,
+              hjust = 0, vjust = 0.5,
+              size = 4, fontface = "bold", family = "Arial") +
+    theme_minimal(base_family = "Arial") +
+    theme(axis.text.y = element_text(face = "bold",size=10),
+          axis.text.x = element_text(face = "bold",size=10),
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.border = element_rect(color = "grey30", fill = NA, size = 0.5)) +
+    labs(x = "Expression group", y = "Cell type")
+  list(summary = res_df, heatmap = ht, bubbleplot = bp)
   
-  list(summary = res_df, heatmap = ht)
 }
