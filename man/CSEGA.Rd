@@ -3,7 +3,7 @@
 \alias{CSEGA}
 \title{Cell-type Specific Expression-Guided Analysis}
 \usage{
-CSEGA(seu, celltype_var, gene, threshold_method = "median")
+CSEGA(seu, celltype_var, gene, threshold_method = "kmeans")
 }
 \arguments{
 \item{seu}{A Seurat object.}
