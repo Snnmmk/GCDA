@@ -1,6 +1,6 @@
 # CSEGA
 Cell-type Specific Enrichment by Gene-based Annotation
-# geneEnrichR
+# CSEGAR
 
 A R function to evaluate whether certain cell types are enriched in the High vs Low expression group of a target gene in Single-Cell data.
 
