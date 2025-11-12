@@ -64,6 +64,11 @@ print(result$bubbleplot)
 # the glm of a celltype 
 result$models[["celltypename"]] (e.g. "Epithelial")
 
+glm_obj <- result$models$celltypename  
+summary(glm_obj)       
+coef(glm_obj)
+
+
 ```
 ## Citation
 If you use **CSEGA** in your research, please cite it as:
