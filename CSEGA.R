@@ -83,7 +83,6 @@ CSEGA <- function(seu, group_var, gene, threshold_method = "median") {
     select(celltype, sig_label)
   rownames(sig_cells) <- sig_cells$celltype
   
-  # 配色方案
   col_fun <- colorRamp2(
     c(min(mat), mean(mat), max(mat)),
     c("#4575B4", "#FFFFBF", "#D73027")
