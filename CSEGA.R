@@ -22,31 +22,34 @@ CSEGA <- function(seu, group_var, gene, threshold_method = "median") {
   library(circlize)
   library(grid)
   
-  # 检查输入
   if (!gene %in% rownames(seu)) stop(paste("Gene", gene, "not found in object."))
   if (!group_var %in% colnames(seu@meta.data)) stop(paste("Column", group_var, "not found."))
   
-  # 提取表达量
   expr <- FetchData(seu, vars = gene)
   
-  # 阈值分组
   if (threshold_method == "median") {
     threshold <- median(expr[[gene]], na.rm = TRUE)
+  } else if (threshold_method == "mean") {
+    threshold <- mean(expr[[gene]], na.rm = TRUE)
+  } else if (grepl("^q[0-9.]+$", threshold_method)) {
+    qval <- as.numeric(sub("q", "", threshold_method))
+    if (is.na(qval) || qval <= 0 || qval >= 1)
+      stop("quantile must be between 0 and 1, e.g., 'q0.25', 'q0.75'")
+    threshold <- quantile(expr[[gene]], probs = qval, na.rm = TRUE)
   } else if (is.numeric(threshold_method)) {
     threshold <- threshold_method
   } else {
-    stop("threshold_method must be 'median' or a numeric cutoff.")
+    stop("threshold_method must be 'median', 'mean', 'q0.xx' or a numeric cutoff.")
   }
+  
   
   seu$expr_group <- ifelse(expr[[gene]] > threshold, "High", "Low")
   
-  # 构造表格
   tab <- table(seu@meta.data[[group_var]], seu$expr_group)
   prop_by_group <- prop.table(tab, margin = 2)
   mat <- as.matrix(prop_by_group)
   storage.mode(mat) <- "numeric"
   
-  # 比例检验（每个cell type）
   celltypes <- rownames(tab)
   res_list <- lapply(celltypes, function(ct){
     x_high <- tab[ct, "High"]
@@ -70,7 +73,6 @@ CSEGA <- function(seu, group_var, gene, threshold_method = "median") {
     mutate(p_adj = p.adjust(p_value, method = "BH")) %>%
     arrange(p_adj)
   
-  # 显著性标注
   sig_cells <- res_df %>%
     mutate(sig_label = case_when(
       p_adj < 0.001 ~ "***",
@@ -87,7 +89,6 @@ CSEGA <- function(seu, group_var, gene, threshold_method = "median") {
     c("#4575B4", "#FFFFBF", "#D73027")
   )
   
-  # 热图
   order_by <- order(mat[, "High"], decreasing = TRUE)
   mat <- mat[order_by, ]
   
