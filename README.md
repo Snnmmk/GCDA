@@ -61,6 +61,9 @@ draw(result$heatmap)
 # Bubble plot
 print(result$bubbleplot)
 
+# the glm of a celltype 
+result$models[["celltypename"]] (e.g. "Epithelial")
+
 ```
 ## Citation
 If you use **CSEGA** in your research, please cite it as:
