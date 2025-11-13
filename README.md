@@ -1,8 +1,8 @@
-# CSEGA
-Cell-type Specific Enrichment by Gene-based Annotation
+# GDCA
+Gene-driven Cell-type Distribution Analysis
 
-`CSEGA` performs **cell-type composition analysis** based on the expression of a single **GENE** in single-cell data.
-It divides cells into *High* and *Low* expression groups, compares the relative abundance of each cell type,
+`GDCA` performs **cell-type composition analysis** based on the expression of a single **GENE** in single-cell data.
+It divides cells icnto *High* and *Low* expression groups, compares the relative abundance of each cell type,
 and provides visual and statistical outputs including heatmaps, bubble plots, and regression summaries.
 
 The advanced version introduces **machine learning–based threshold learning** and **explainable logistic regression**.
@@ -25,21 +25,21 @@ The advanced version introduces **machine learning–based threshold learning** 
 
 ---
 
-# Download CSEGA
+# Download GDCA
 
 ```r
 library(remotes)
-remotes::install_github("Snnmmk/CSEGA")
+remotes::install_github("Snnmmk/GDCA")
 ```
 
-# CSEGA R
+# GDCA R
 
 
 ## 🔧 Usage
 
 ```r
-library(CSEGA)
-result <- CSEGA(sce_data, "celltype", "gene_name", threshold_method = "kmeans")
+library(GDCA)
+result <- GDCA(sce_data, "celltype", "gene_name", threshold_method = "kmeans")
 
 ⚙️ Threshold options
 
@@ -71,6 +71,6 @@ coef(glm_obj)
 Note: The heatmap shows cell-type proportions in High/Low groups; the glm β values are visualized in the bubble plot and stored in result$summary and result$models for further inspection.
 
 ## Citation
-If you use **CSEGA** in your research, please cite it as:
+If you use **GDCA** in your research, please cite it as:
 
-Zidong Feng (2025). *CSEGA: Cell-type Specific Expression-Guided Analysis with Adaptive and Explainable Learning*. https://github.com/Snnmmk/CSEGA
+Zidong Feng (2025). *GDCA: Cell-type Specific Expression-Guided Analysis with Adaptive and Explainable Learning*. https://github.com/Snnmmk/GDCA
