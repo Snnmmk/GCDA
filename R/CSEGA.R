@@ -1,4 +1,4 @@
-#' CSEGA: Cell-type Specific Expression-Guided Analysis 
+#' GCDA: Gene-driven Cell-type Distribution Analysis
 
 #' @description
 #' This function analyzes how the expression of a given gene is associated with the composition of each cell type
@@ -37,7 +37,7 @@
 #'
 #' @export
 
-CSEGA <- function(seu,
+GCDA <- function(seu,
                   group_var,
                   gene,
                   threshold_method = "kmeans",
