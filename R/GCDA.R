@@ -1,5 +1,5 @@
 #' GCDA: Gene-driven Cell-type Distribution Analysis
-
+ 
 #' @description
 #' This function analyzes how the expression of a given gene is associated with the composition of each cell type
 #' in a single-cell dataset. It extends the conventional thresholding methods (mean, median, quantile) by
