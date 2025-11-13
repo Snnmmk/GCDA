@@ -1,7 +1,7 @@
-Package: CSEGA
+Package: GCDA
 Type: Package
-Title: Cell-type Specific Enrichment by Gene-based Annotation
-Version: 0.1.0
+Title: Gene-driven Cell-type Distribution Analysis
+Version: 0.1.1
 Author: Zidong Feng/Moker/Snnmmk <mokerfeng@gmail.com>
 Maintainer: Zidong Feng/Moker/Snnmmk <mokerfeng@gmail.com>
 Description: Provides a simple tool for evaluating whether specific cell types 
