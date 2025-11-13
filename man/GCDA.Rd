@@ -39,8 +39,10 @@ A list containing:
 This function analyzes how the expression of a given gene is associated with the composition of each cell type
 in a single-cell dataset. It extends the conventional thresholding methods (mean, median, quantile) by
 introducing two advanced modes:
-(1) **k-means-based thresholding**, which automatically partitions expression values into two clusters (High/Low);
-(2) **"learn" mode**, which searches across quantile thresholds (from 1% to 99%) to identify the optimal cutoff
+
+(1) k-means-based thresholding, which automatically partitions expression values into two clusters (High/Low);
+
+(2) "learn" mode, which searches across quantile thresholds (from 1% to 99%) to identify the optimal cutoff
 that maximizes the cell-type compositional divergence.
 
 For interpretability, the function further fits a logistic regression model for each cell type:
