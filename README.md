@@ -40,7 +40,7 @@ remotes::install_github("Snnmmk/GCDA")
 ```r
 library(GCDA)
 result <- GCDA(sce_data, "celltype", "gene_name", threshold_method = "kmeans")
-
+```
 ⚙️ Threshold options
 
 threshold_method can be one of the following:
@@ -51,7 +51,7 @@ threshold_method can be one of the following:
 	•	"kmeans"(default) - Apply two-cluster k-means on expression values. The cluster with the higher mean is labeled High.
     •	"learn" - Perform an adaptive search across quantile thresholds (from 1% to 99%) and automatically select the cutoff that maximizes cell-type compositional divergence. This mode enables machine-learned threshold discovery.
 
-
+```r
 # View summary
 head(result$summary)
 
