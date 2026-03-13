@@ -1,51 +1,30 @@
 #' GCDA: Gene-driven Cell-type Distribution Analysis
- 
+#' 
 #' @description
 #' This function analyzes how the expression of a given gene is associated with the composition of each cell type
-#' in a single-cell dataset. It extends the conventional thresholding methods (mean, median, quantile) by
-#' introducing two advanced modes:
-
-#' (1) k-means-based thresholding**, which automatically partitions expression values into two clusters (High/Low);
-
-#' (2) "learn" mode, which searches across quantile thresholds (from 1% to 99%) to identify the optimal cutoff
-#' that maximizes the cell-type compositional divergence.
-#'
-#' For interpretability, the function further fits a logistic regression model for each cell type:
-#' \deqn{I(celltype == c_t) ~ expression}
-#' estimating the β coefficient and its statistical significance, thereby quantifying how strongly the gene’s
-#' expression level predicts the probability of belonging to that specific cell type.
+#' in a single-cell dataset. It automatically learns the best cutoff that maximizes the cell-type compositional divergence,
+#' and fits a logistic regression model (with optional covariates) to quantify the effect size.
 #'
 #' @param seu A Seurat object containing single-cell transcriptomic data.
 #' @param group_var Metadata column indicating the grouping variable (e.g., "celltype").
 #' @param gene Target gene symbol (e.g., "DDIT3").
-#' @param threshold_method Thresholding method, one of:
-#'   - "median", "mean", "q0.xx" (quantile-based);
-#'   - "kmeans" (two-cluster k-means);
-#'   - "learn" (automatically learns the best cutoff from quantiles 0.01–0.99);
-#'   - or a numeric value.
-#'
-#' @return A list containing:
-#'   \item{summary}{Data frame of proportions, fold changes, odds ratios, logistic β values, and adjusted p-values.}
-#'   \item{heatmap}{A ComplexHeatmap object visualizing compositional differences.}
-#'   \item{bubbleplot}{A ggplot2 bubble plot showing High/Low proportions and significance.}
-#'   \item{adaptive_cutoff}{The learned or applied cutoff threshold.}
-#'   \item{models}{List of per-celltype logistic regression model objects.}
-#'
-#' @details
-#' The "learn" mode iteratively evaluates candidate thresholds and selects the one that maximizes
-#' the chi-square statistic between High/Low groups and cell-type composition, thus making the threshold
-#' data-driven rather than fixed. Logistic regression enhances interpretability by providing
-#' effect size (β) and significance for each cell type.
+#' @param threshold_method Method for cutoff: "kmeans", "learn", "median", "mean", "q0.xx", or a numeric value.
+#' @param learn_grid Quantile grid for "learn" mode (default 0.01 to 0.99).
+#' @param covariates Optional character vector of metadata columns to control for confounders (e.g., c("nCount_RNA", "orig.ident")).
+#' @param min_cells_per_type Minimum cells required for a celltype to be modeled.
+#' @param verbose Print progress messages.
 #'
 #' @export
 
 GCDA <- function(seu,
-                  group_var,
-                  gene,
-                  threshold_method = "kmeans",
-                  learn_grid = seq(0.01, 0.99, by = 0.01),
-                  min_cells_per_type = 5,
-                  verbose = TRUE) {
+                 group_var,
+                 gene,
+                 threshold_method = "kmeans",
+                 learn_grid = seq(0.01, 0.99, by = 0.01),
+                 covariates = NULL, 
+                 min_cells_per_type = 5,
+                 verbose = TRUE) {
+  
   # ---- dependencies ----
   if (!requireNamespace("Seurat", quietly = TRUE)) stop("Please install Seurat.")
   if (!requireNamespace("ComplexHeatmap", quietly = TRUE)) stop("Please install ComplexHeatmap.")
@@ -63,6 +42,12 @@ GCDA <- function(seu,
   if (!is(seu, "Seurat")) stop("`seu` must be a Seurat object.")
   if (!gene %in% rownames(seu)) stop(paste0("Gene '", gene, "' not found in Seurat object rownames."))
   if (!group_var %in% colnames(seu@meta.data)) stop(paste0("Metadata column '", group_var, "' not found in Seurat object."))
+  
+  # 检查协变量是否存在于 metadata 中
+  if (!is.null(covariates)) {
+    missing_covs <- setdiff(covariates, colnames(seu@meta.data))
+    if (length(missing_covs) > 0) stop(paste("Covariates not found in metadata:", paste(missing_covs, collapse = ", ")))
+  }
   
   # ---- extract expression vector ----
   expr_df <- tryCatch(FetchData(seu, vars = gene), error = function(e) stop("FetchData failed: ", e$message))
@@ -134,19 +119,36 @@ GCDA <- function(seu,
   summ_list <- vector("list", length(celltypes))
   names(summ_list) <- celltypes
   all_meta <- seu@meta.data
-  all_meta$expr <- expr
+  
+  # 因子化分组，并确保 Low 为对照基线
+  all_meta$expr_group <- factor(seu$expr_group, levels = c("Low", "High")) 
+  
+  # 构建带协变量的公式字符串
+  if (is.null(covariates)) {
+    form_str <- "y ~ expr_group"
+  } else {
+    form_str <- paste("y ~ expr_group", paste(covariates, collapse = " + "), sep = " + ")
+  }
+  form <- as.formula(form_str)
+
   for (i in seq_along(celltypes)) {
     ct <- celltypes[i]
     y <- as.integer(as.character(all_meta[[group_var]]) == ct)
-    df <- data.frame(y = y, expr = all_meta$expr)
-    if (length(unique(y)) < 2 || var(df$expr, na.rm = TRUE) == 0) {
+    
+    # 提取所需数据列
+    cols_to_extract <- c("expr_group", covariates)
+    df <- data.frame(y = y, all_meta[, cols_to_extract, drop = FALSE])
+    
+    if (length(unique(y)) < 2 || length(unique(df$expr_group)) < 2) {
       models[[ct]] <- NULL
       summ_list[[ct]] <- tibble::tibble(celltype = ct, beta = NA_real_, p = NA_real_)
       next
     }
-    glm_fit <- tryCatch(glm(y ~ expr, data = df, family = binomial), 
+    
+    # 使用动态公式拟合 glm
+    glm_fit <- tryCatch(glm(form, data = df, family = binomial), 
                         error = function(e) NULL, 
-                        warning = function(w) tryCatch(glm(y ~ expr, data = df, family = binomial), error = function(e) NULL))
+                        warning = function(w) tryCatch(glm(form, data = df, family = binomial), error = function(e) NULL))
     if (is.null(glm_fit)) {
       models[[ct]] <- NULL
       summ_list[[ct]] <- tibble::tibble(celltype = ct, beta = NA_real_, p = NA_real_)
@@ -154,7 +156,15 @@ GCDA <- function(seu,
     }
     models[[ct]] <- glm_fit
     coefs <- summary(glm_fit)$coefficients
-    if ("expr" %in% rownames(coefs)) { beta <- coefs["expr", "Estimate"]; pval <- coefs["expr", "Pr(>|z|)"] } else { beta <- NA_real_; pval <- NA_real_ }
+    
+    # 提取 High 组相较于 Low 组的效应
+    if ("expr_groupHigh" %in% rownames(coefs)) { 
+      beta <- coefs["expr_groupHigh", "Estimate"]
+      pval <- coefs["expr_groupHigh", "Pr(>|z|)"] 
+    } else { 
+      beta <- NA_real_
+      pval <- NA_real_ 
+    }
     summ_list[[ct]] <- tibble::tibble(celltype = ct, beta = beta, p = pval)
   }
   summary_df <- dplyr::bind_rows(summ_list)
@@ -216,7 +226,7 @@ GCDA <- function(seu,
   bp <- ggplot(bubble_df, aes(x = expr_group, y = celltype)) +
     geom_point(aes(size = proportion, fill = beta_for_plot), shape = 21, color = "grey30") +
     scale_size_continuous(range = c(3, 10), name = "Proportion") +
-    scale_fill_gradient2(low = "#057dcd", mid = "#FFFFBF", high = "#e50000", midpoint = 0, name = "β (expr → P(celltype))") +
+    scale_fill_gradient2(low = "#057dcd", mid = "#FFFFBF", high = "#e50000", midpoint = 0, name = "Log Odds (High vs Low)") +
     geom_text(data = bubble_df %>% distinct(celltype, sig_label),
               aes(x = x_max, y = celltype, label = sig_label),
               inherit.aes = FALSE, hjust = 0, vjust = 0.5, size = 4, fontface = "bold") +
